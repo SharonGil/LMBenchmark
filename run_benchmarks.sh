@@ -32,7 +32,7 @@ QPS_VALUES=()
 found_scenarios=true
 
 for arg in "${@:4}"; do
-    if [[ "$arg" == "sharegpt" || "$arg" == "short-input" || "$arg" == "long-input" || "$arg" == "long-long" || "$arg" == "all" ]]; then
+    if [[ "$arg" == "sharegpt" || "$arg" == "short-input" || "$arg" == "long-input" || "$arg" == "long-long" || "$arg" == "apps" || "$arg" == "all" ]]; then
         SCENARIOS+=("$arg")
     else
         found_scenarios=false
@@ -92,8 +92,19 @@ run_long_long() {
     fi
 }
 
+# Function to run apps benchmark
+run_apps() {
+    echo "Running apps benchmark..."
+    if [ ${#QPS_VALUES[@]} -eq 0 ]; then
+        "${SCRIPT_DIR}/synthetic-multi-round-qa/app_input_short_output.sh" "$MODEL" "$BASE_URL" "${KEY}_apps"
+    else
+        "${SCRIPT_DIR}/synthetic-multi-round-qa/app_input_short_output.sh" "$MODEL" "$BASE_URL" "${KEY}_apps" "${QPS_VALUES[@]}"
+    fi
+}
+
 # Run selected scenarios
 for scenario in "${SCENARIOS[@]}"; do
+    echo "Running scenario: $scenario"
     case "$scenario" in
         "sharegpt")
             run_sharegpt
@@ -106,6 +117,9 @@ for scenario in "${SCENARIOS[@]}"; do
             ;;
         "long-long")
             run_long_long
+            ;;
+        "apps")
+            run_apps
             ;;
         "all")
             run_sharegpt
