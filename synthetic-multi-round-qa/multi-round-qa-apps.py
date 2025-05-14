@@ -338,7 +338,7 @@ class UserSession:
     def _build_new_question(self):
         self.question_id += 1
         # Generate a random string of length 2000
-        random_string = ''.join(random.choices('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', k=2000))
+        random_string = ''.join(random.choices('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', k=200))
         return (
             f"Here's question #{self.question_id}: can you tell me "
             + "a new long story with a happy ending? "
