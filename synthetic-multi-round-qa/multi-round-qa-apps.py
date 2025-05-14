@@ -369,18 +369,16 @@ class UserSession:
                 ]
             self.question_id += 1
         else:
+            rag_docs = self._get_all_rag_docs()
             prompt = self._build_new_question()
+            prompt = rag_docs + prompt
         if len(self.chat_history) == 0:
             prompt = self._build_system_prompt() + prompt
-
-        # Add RAG documents to the prompt
-        rag_docs = self._get_all_rag_docs()
         #print(f"RAG docs: {rag_docs}")
-        prompt = rag_docs + prompt
-        #print(f"final prompt sent to the model: {prompt}")
+        #prompt = rag_docs + prompt
         self.chat_history.on_user_query(prompt)
         logger.debug(
-            f"User {self.user_config.user_id} issues request {self.question_id}"
+            f"User {self.user_config.user_id} issues request number {self.question_id}: \n {prompt}\n\n"
         )
         if self.use_sharegpt:
             if self.start_with_gpt:
