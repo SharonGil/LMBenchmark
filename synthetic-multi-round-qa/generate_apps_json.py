@@ -23,7 +23,7 @@ def generate_apps_json(num_apps, sys_prompt_len, tools_len, rag_doc_len, rag_doc
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate random Apps JSON file")
-    parser.add_argument("--num-apps", type=int, default=80, help="Number of apps to generate")
+    parser.add_argument("--num-apps", type=int, default=5, help="Number of apps to generate")
     parser.add_argument("--sys-prompt-len", type=int, default=5000, help="Length of system prompt strings")
     parser.add_argument("--tools-len", type=int, default=200, help="Length of tools strings")
     parser.add_argument("--rag-doc-len", type=int, default=1000, help="Length of each RAG document")

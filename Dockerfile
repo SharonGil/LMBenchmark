@@ -24,6 +24,14 @@ ENV MODEL="meta-llama/Llama-3.1-8B-Instruct" \
     SAVE_FILE_KEY="benchmark_results" \
     SCENARIOS="all" \
     QPS_VALUES="1.34" \
+    NUM_APPS="4" \
+    SYSTEM_PROMPT_LEN="5000" \
+    RAG_DOC_LEN="1000" \
+    RAG_DOC_COUNT="10" \
+    USERS_PER_APP="4" \
+    NUM_USERS="10" \
+    NUM_ROUNDS="3" \
+    DURATION="60" \
     PYTHONPATH="/app" \
     PATH="/root/.cargo/bin:$PATH"
 

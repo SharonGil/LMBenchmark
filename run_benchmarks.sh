@@ -3,8 +3,98 @@
 # Get the directory where this script is located
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-if [[ $# -lt 3 ]]; then
+# Default values
+MODEL=""
+BASE_URL=""
+KEY=""
+SCENARIOS=("all")
+QPS_VALUES=(1)
+NUM_APPS="10"
+USERS_PER_APP="2"
+SYSTEM_PROMPT_LEN="1000"
+RAG_DOC_LEN="200"
+RAG_DOC_COUNT="5"
+NUM_USERS="50"
+NUM_ROUNDS="10"
+DURATION="60"
+
+# Parse named parameters
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --model=*)
+      MODEL="${1#*=}"
+      shift
+      ;;
+    --base_url=*)
+      BASE_URL="${1#*=}"
+      shift
+      ;;
+    --save_file_key=*)
+      KEY="${1#*=}"
+      shift
+      ;;
+    --scenarios=*)
+      IFS=',' read -ra SCENARIOS <<< "${1#*=}"
+      shift
+      ;;
+    --qps_values=*)
+      IFS=',' read -ra QPS_VALUES <<< "${1#*=}"
+      shift
+      ;;
+    --num_apps=*)
+      NUM_APPS="${1#*=}"
+      shift
+      ;;
+    --users_per_app=*)
+      USERS_PER_APP="${1#*=}"
+      shift
+      ;;
+    --system_prompt_len=*)
+      SYSTEM_PROMPT_LEN="${1#*=}"
+      shift
+      ;;
+    --rag_doc_len=*)
+      RAG_DOC_LEN="${1#*=}"
+      shift
+      ;;
+    --rag_doc_count=*)
+      RAG_DOC_COUNT="${1#*=}"
+      shift
+      ;;
+    --num_users=*)
+      NUM_USERS="${1#*=}"
+      shift
+      ;;
+    --num_rounds=*)
+      NUM_ROUNDS="${1#*=}"
+      shift
+      ;;
+    --duration=*)
+      DURATION="${1#*=}"
+      shift
+      ;;
+    # Backward compatibility for positional arguments
+    *)
+      if [[ -z "$MODEL" ]]; then
+        MODEL="$1"
+      elif [[ -z "$BASE_URL" ]]; then
+        BASE_URL="$1"
+      elif [[ -z "$KEY" ]]; then
+        KEY="$1"
+      elif [[ "$1" == "sharegpt" || "$1" == "short-input" || "$1" == "long-input" || "$1" == "long-long" || "$1" == "apps" || "$1" == "all" ]]; then
+        SCENARIOS+=("$1")
+      else
+        QPS_VALUES+=("$1")
+      fi
+      shift
+      ;;
+  esac
+done
+
+# Check required parameters
+if [[ -z "$MODEL" || -z "$BASE_URL" || -z "$KEY" ]]; then
     echo "Usage: $0 <model> <base url> <save file key> [scenarios...] [qps_values...]"
+    echo "   or: $0 --model=\"model\" --base_url=\"url\" --save_file_key=\"key\" [--scenarios=\"scenario1,scenario2\"] [--qps_values=\"1.0,2.0\"]"
     echo ""
     echo "Scenarios:"
     echo "  sharegpt        - ShareGPT benchmark"
@@ -19,36 +109,28 @@ if [[ $# -lt 3 ]]; then
     echo ""
     echo "  # Run specific benchmarks with custom QPS"
     echo "  $0 meta-llama/Llama-3.1-8B-Instruct http://localhost:8000 /mnt/requests/benchmark sharegpt short-input 1.34 2.0 3.0"
+    echo ""
+    echo "  # Using named parameters"
+    echo "  $0 --model=\"meta-llama/Llama-3.1-8B-Instruct\" --base_url=\"http://localhost:8000\" --save_file_key=\"/mnt/requests/benchmark\" --scenarios=\"sharegpt,short-input\" --qps_values=\"1.34,2.0,3.0\""
     exit 1
 fi
 
-MODEL=$1
-BASE_URL=$2
-KEY=$3
-
-# Parse scenarios and QPS values
-SCENARIOS=()
-QPS_VALUES=()
-found_scenarios=true
-
-for arg in "${@:4}"; do
-    if [[ "$arg" == "sharegpt" || "$arg" == "short-input" || "$arg" == "long-input" || "$arg" == "long-long" || "$arg" == "apps" || "$arg" == "all" ]]; then
-        SCENARIOS+=("$arg")
-    else
-        found_scenarios=false
-        QPS_VALUES+=("$arg")
-    fi
-done
-
-# If no scenarios specified, default to all
-if [ ${#SCENARIOS[@]} -eq 0 ]; then
-    SCENARIOS=("all")
-fi
-
-# If no QPS values specified, use defaults for each scenario
-if [ ${#QPS_VALUES[@]} -eq 0 ]; then
-    QPS_VALUES=()
-fi
+# Print all parameters for logging
+echo "============ BENCHMARK PARAMETERS ============"
+echo "MODEL: $MODEL"
+echo "BASE_URL: $BASE_URL"
+echo "SAVE_FILE_KEY: $KEY"
+echo "SCENARIOS: ${SCENARIOS[*]}"
+echo "QPS_VALUES: ${QPS_VALUES[*]}"
+echo "NUM_APPS: $NUM_APPS"
+echo "USERS_PER_APP: $USERS_PER_APP"
+echo "SYSTEM_PROMPT_LEN: $SYSTEM_PROMPT_LEN"
+echo "RAG_DOC_LEN: $RAG_DOC_LEN"
+echo "RAG_DOC_COUNT: $RAG_DOC_COUNT"
+echo "NUM_USERS: $NUM_USERS"
+echo "NUM_ROUNDS: $NUM_ROUNDS"
+echo "DURATION: $DURATION"
+echo "=============================================="
 
 # Function to run ShareGPT benchmark
 run_sharegpt() {
@@ -96,9 +178,9 @@ run_long_long() {
 run_apps() {
     echo "Running apps benchmark..."
     if [ ${#QPS_VALUES[@]} -eq 0 ]; then
-        "${SCRIPT_DIR}/synthetic-multi-round-qa/app_input_short_output.sh" "$MODEL" "$BASE_URL" "${KEY}_apps"
+        "${SCRIPT_DIR}/synthetic-multi-round-qa/app_input_short_output.sh" "$MODEL" "$BASE_URL" "${KEY}_apps" "$NUM_APPS" "$USERS_PER_APP" "$SYSTEM_PROMPT_LEN" "$RAG_DOC_LEN" "$RAG_DOC_COUNT" "$NUM_USERS" "$NUM_ROUNDS" "$DURATION"
     else
-        "${SCRIPT_DIR}/synthetic-multi-round-qa/app_input_short_output.sh" "$MODEL" "$BASE_URL" "${KEY}_apps" "${QPS_VALUES[@]}"
+        "${SCRIPT_DIR}/synthetic-multi-round-qa/app_input_short_output.sh" "$MODEL" "$BASE_URL" "${KEY}_apps" "$NUM_APPS" "$USERS_PER_APP" "$SYSTEM_PROMPT_LEN" "$RAG_DOC_LEN" "$RAG_DOC_COUNT" "$NUM_USERS" "$NUM_ROUNDS" "$DURATION" "${QPS_VALUES[@]}"
     fi
 }
 

@@ -68,3 +68,23 @@ python3 calculat_itl.py
 - The benchmark automatically handles the correct script paths regardless of where it's run from
 - QPS values can be customized through command-line arguments
 - Results are saved in CSV format with the QPS value in the filename
+
+# generate_apps_json.py Usage
+
+This script generates a JSON file containing random app data for testing or benchmarking.
+
+## Usage
+
+Run the script from the command line:
+
+```bash
+python generate_apps_json.py [--num-apps N] [--sys-prompt-len L] [--rag-doc-len L] [--rag-doc-count N] [--output FILE]
+```
+
+### Example
+
+```bash
+python generate_apps_json.py --num-apps 10 --output my_apps.json
+```
+
+This will create a `my_apps.json` file with 10 randomly generated apps.
