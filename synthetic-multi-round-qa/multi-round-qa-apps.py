@@ -519,6 +519,12 @@ class UserSessionManager:
     def _ramp_up(self, timestamp: float, ramp_up_time: float):
         for i in range(self.workload_config.num_users):
             new_session = self._create_user_session()
+            if new_session is not None:
+                self.last_user_join = timestamp
+                logger.info(
+                    f"_ramp_up: Joined a new user {self.user_id}, "
+                    f"now active users: {len(self.sessions)}"
+                )
             offset = ramp_up_time - i * self.gap_between_users
             if offset < 0:
                 break
@@ -557,7 +563,7 @@ class UserSessionManager:
         if self.start_time is None:
             self.start_time = timestamp
 
-        if timestamp - self.last_user_join > self.gap_between_users:
+        if (self.workload_config.num_users > len(self.sessions)) and (timestamp - self.last_user_join > self.gap_between_users):
             new_session = self._create_user_session()
             if new_session is not None:
                 self.last_user_join = timestamp
