@@ -206,6 +206,7 @@ class RequestExecutor:
                 max_tokens=max_tokens,
                 temperature=0.0,
                 extra_headers=extra_headers,
+                stream_options={"include_usage": True},
                 #tools=[
                 #    {"type": "function", 
                 #     "function": {"name": "tool", "description": tools}
@@ -238,6 +239,7 @@ class RequestExecutor:
                         model=self.model,
                         prompt=prompt,
                         stream=False,
+                        max_tokens=max_tokens,
                     )
                     if hasattr(final_response, 'usage') and final_response.usage is not None:
                         tokens_out = final_response.usage.completion_tokens
