@@ -33,7 +33,16 @@ ENV MODEL="meta-llama/Llama-3.1-8B-Instruct" \
     NUM_ROUNDS="3" \
     DURATION="60" \
     PYTHONPATH="/app" \
-    PATH="/root/.cargo/bin:$PATH"
+    PATH="/root/.cargo/bin:$PATH" \
+    NUM_USERS_WARMUP="20" \
+    NUM_USERS="15" \
+    NUM_ROUNDS="20" \
+    SYSTEM_PROMPT="1000" \
+    CHAT_HISTORY="20000" \
+    ANSWER_LEN="100" \
+    INIT_USER_ID="1" \
+    TEST_DURATION="100" \
+    USE_CHAT_COMPLETIONS="False"
 
 # Create a virtual environment and install dependencies
 RUN . ~/.bashrc && \
